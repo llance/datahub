@@ -65,6 +65,11 @@ class SlackSourceConfig(ConfigModel):
         default=False,
         description="Whether to ingest public channels. If set to true needs `channels:read` scope.",
     )
+    ingest_selected_channels = Field(
+        type=bool,
+        default=False,
+        description="Whether to ingest defined selected public channels. If set to true needs `channels:read` scope.",
+    )
     channels_iteration_limit = Field(
         type=int,
         default=200,
@@ -122,7 +127,8 @@ class SlackSource(Source):
         self.workspace_base_url = str(auth_resp.data.get("url"))
         logger.info("Successfully connected to Slack")
         logger.info(auth_resp.data)
-        if self.config.ingest_public_channels:
+        # if self.config.ingest_public_channels:
+        if self.config.ingest_selected_channels:
             yield from self.get_public_channels()
         if self.config.enrich_user_metadata:
             yield from self.get_user_info()
