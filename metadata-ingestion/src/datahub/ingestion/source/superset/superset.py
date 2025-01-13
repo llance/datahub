@@ -479,10 +479,15 @@ class SupersetSource(StatefulIngestionSourceBase):
         chart_url = f"{self.config.display_uri}{chart_data.get('url', '')}"
 
         datasource_id = chart_data.get("datasource_id")
-        dataset_response = self.get_dataset_info(datasource_id)
-        datasource_urn = self.get_datasource_urn_from_id(
-            dataset_response, self.platform
-        )
+        if not datasource_id:
+            logger.debug(
+                f'chart {chart_data["id"]} has no datasource_id, skipping fetching dataset info'
+            )
+            datasource_urn = None
+        else:
+            dataset_response = self.get_dataset_info(datasource_id)
+            ds_urn = self.get_datasource_urn_from_id(dataset_response, self.platform)
+            datasource_urn = [ds_urn] if not isinstance(ds_urn, list) else ds_urn
 
         params = json.loads(chart_data.get("params", "{}"))
         metrics = [
